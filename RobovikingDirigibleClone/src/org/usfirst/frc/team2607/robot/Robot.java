@@ -37,6 +37,7 @@ public class Robot extends IterativeRobot {
 	RobotDrive robotDrive;
 	AutonomousEngine autoEngine;
 	public Solenoid shifter;
+	public Solenoid flap;
 	Talon pickup;
 	Thread Autothread = null;
 	
@@ -53,10 +54,10 @@ public class Robot extends IterativeRobot {
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
 		rightTrans = new Transmission(Constants.rightMotorA , Constants.rightMotorB , "Right Transmission");
 		shifter = new Solenoid(Constants.pcmDeviceID , Constants.shifterSolenoid);
+		flap = new Solenoid(Constants.pcmDeviceID , Constants.brakeSolenoid);
 		pickup = new Talon(Constants.pickupMotor);
 		robotDrive = new RobotDrive(leftTrans , rightTrans);
 		robotDrive.setSafetyEnabled(false);
-		
 		driveController = new RobovikingStick(Constants.driverController);
 		opController = new RobovikingStick(Constants.operatorController);
 		autoEngine=new AutonomousEngine(this);
@@ -207,13 +208,13 @@ public class Robot extends IterativeRobot {
 		robotDrive.arcadeDrive(driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxLeftStickY) , 
 				driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
 		
-		if(opController.getPOV(0) == 0 )   {
+		/*if(opController.getPOV(0) == 0 )   {
 			climber.runForward();
 		} else if(opController.getPOV(0) == 180) {
 			climber.runBackwards();
 		} else {
 			climber.stop();
-		}
+		}*/
 		
 		//itsTheCliiiiiiiiiiiiiiiiiiiiiiimb.lockInPlace(opController.getToggleButton(RobovikingStick.xBoxButtonY));
 		
@@ -233,8 +234,11 @@ public class Robot extends IterativeRobot {
 		
 		shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
 		leftTrans.setHighGear(!shifter.get() , false);
+		
 		rightTrans.setHighGear(!shifter.get() , false);
-		gearHandler.set(opController.getRawButton(RobovikingStick.xBoxButtonA));
+		gearHandler.set(driveController.getRawButton(RobovikingStick.xBoxButtonA));
+		flap.set(driveController.getToggleButton(RobovikingStick.xBoxButtonB));
+		flap.set(opController.getToggleButton(RobovikingStick.xBoxButtonB));
 		
 	}
 

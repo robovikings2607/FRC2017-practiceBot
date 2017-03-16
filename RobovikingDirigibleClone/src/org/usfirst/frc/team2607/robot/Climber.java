@@ -38,10 +38,10 @@ public class Climber {
 		}
 	}
 	
-	public void stop(){
-		talonMotor.set(0.0);
-		counter = 0;
-		climberBrake.set(false);
+	public void stop(boolean t){
+		//talonMotor.set(0.0);
+		//counter = 0;
+		climberBrake.set(t);
 	}
 	
 	public void lockInPlace(){
@@ -51,4 +51,5 @@ public class Climber {
 	public void unlockFromPlace(){
 		climberBrake.set(true);
 	}
+	
 }

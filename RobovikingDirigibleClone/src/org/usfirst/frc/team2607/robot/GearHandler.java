@@ -9,12 +9,13 @@ public class GearHandler {
 	
 	public GearHandler (int port){
 		//TODO set the Solenoid to a "port number" parameter
-		door= new Solenoid (Constants.pcmDeviceID , port);
-		
+		door = new Solenoid (Constants.pcmDeviceID , port);
+	 
 	}
 	public void set(boolean t) {
-		door.set(!t);
+		door.set(t);
 	}
+		
 	public boolean get (){
 		return door.get();
 	}
