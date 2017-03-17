@@ -23,7 +23,7 @@ public class Climber {
 	 }
 	 
 	public void runForward(){
-	 climberBrake.set(true);
+	 //climberBrake.set(true);
 	 counter ++;
 	 if(counter >= 20){ 
 		 talonMotor.set(1.0);	
@@ -31,7 +31,7 @@ public class Climber {
 	 }
 	
 	public void runBackwards(){
-		climberBrake.set(true);
+		//climberBrake.set(true);
 		counter++;
 		if(counter >= 20){
 			talonMotor.set(-1.0);
@@ -42,6 +42,11 @@ public class Climber {
 		//talonMotor.set(0.0);
 		//counter = 0;
 		climberBrake.set(t);
+	}
+	
+	public void stopMotor(){
+		talonMotor.set(0.0);
+		counter = 0;
 	}
 	
 	public void lockInPlace(){

@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
+	Shooter shooter;
 	Climber climber;
 	public GearHandler gearHandler;
 	public Transmission leftTrans , rightTrans;
@@ -42,6 +43,8 @@ public class Robot extends IterativeRobot {
 	Thread Autothread = null;
 	
 	double targetSpeed = 0.0, rightVoltage = 0.0, leftVoltage = 0.0;
+	double shooterTargetSpeed = 0.0;
+	boolean enableShooterPID = false;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -49,12 +52,13 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		shooter = new Shooter();
 		climber = new Climber(Constants.climberMotor);
 		gearHandler = new GearHandler(Constants.gearSolenoid);
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
 		rightTrans = new Transmission(Constants.rightMotorA , Constants.rightMotorB , "Right Transmission");
 		shifter = new Solenoid(Constants.pcmDeviceID , Constants.shifterSolenoid);
-		flap = new Solenoid(Constants.pcmDeviceID , Constants.brakeSolenoid);
+		//flap = new Solenoid(Constants.pcmDeviceID , Constants.brakeSolenoid);
 		pickup = new Talon(Constants.pickupMotor);
 		robotDrive = new RobotDrive(leftTrans , rightTrans);
 		robotDrive.setSafetyEnabled(false);
@@ -66,6 +70,9 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("targetSpeed", targetSpeed);
 		SmartDashboard.putNumber("rightVoltage", rightVoltage);
 		SmartDashboard.putNumber("leftVoltage", leftVoltage);
+		
+		SmartDashboard.putNumber("shooterTargetSpeed", shooterTargetSpeed);
+		SmartDashboard.putBoolean("enableShooterPID", enableShooterPID);
 
 		
 		// for tuning....webserver to view PID logs
@@ -196,6 +203,7 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		leftTrans.enablePID(true, false);
 		rightTrans.enablePID(true, false);
+		shooter.disablePID();
 	}
 
 	/**
@@ -208,13 +216,13 @@ public class Robot extends IterativeRobot {
 		robotDrive.arcadeDrive(driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxLeftStickY) , 
 				driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
 		
-		/*if(opController.getPOV(0) == 0 )   {
+		if(opController.getPOV(0) == 0 )   {
 			climber.runForward();
 		} else if(opController.getPOV(0) == 180) {
 			climber.runBackwards();
 		} else {
-			climber.stop();
-		}*/
+			climber.stopMotor();
+		}
 		
 		//itsTheCliiiiiiiiiiiiiiiiiiiiiiimb.lockInPlace(opController.getToggleButton(RobovikingStick.xBoxButtonY));
 		
@@ -225,20 +233,28 @@ public class Robot extends IterativeRobot {
 		} else {
 			pickup.set(0.0);
 		}
-		
+		/*
 		SmartDashboard.putNumber("leftSpeed", leftTrans.getRate());
 		SmartDashboard.putNumber("rightSpeed", rightTrans.getRate());
 		
 		SmartDashboard.putNumber("leftError", leftTrans.getError());
 		SmartDashboard.putNumber("rightError", rightTrans.getError());
+		*/
+		
+		//SHOOTER STUFF-A-ROO
+		shooter.setShooterSpeed(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
+		SmartDashboard.putNumber("shooterEncSpeed", shooter.getShooterEncSpeed());
+		System.out.println(shooter.getInfo());
+		shooter.load(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger));
 		
 		shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
 		leftTrans.setHighGear(!shifter.get() , false);
 		
 		rightTrans.setHighGear(!shifter.get() , false);
 		gearHandler.set(driveController.getRawButton(RobovikingStick.xBoxButtonA));
-		flap.set(driveController.getToggleButton(RobovikingStick.xBoxButtonB));
-		flap.set(opController.getToggleButton(RobovikingStick.xBoxButtonB));
+		climber.stop(driveController.getRawButton(RobovikingStick.xBoxButtonB));
+		//climber.stop(opController.getRawButton(RobovikingStick.xBoxButtonB));
+		
 		
 	}
 

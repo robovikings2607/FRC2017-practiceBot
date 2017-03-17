@@ -17,6 +17,8 @@ public class Shooter {
 		shooterMaster = new CANTalon(Constants.shooterMotorMaster);
 		shooterFollower = new CANTalon(Constants.shooterMotorFollower);
 		
+		loader= new Talon(Constants.loaderMotor);
+		
 		shooterFollower.changeControlMode(TalonControlMode.Follower);
 		shooterFollower.set(Constants.shooterMotorMaster);
 		
@@ -43,9 +45,23 @@ public class Shooter {
 		shooterMaster.changeControlMode(TalonControlMode.PercentVbus);
 		logger.enableLogging(false);
 	}
+	
+	public void load(boolean switcher) {
+		if(switcher) loader.set(1.0);
+		else loader.set(0.0);
+	}
 
-	public void setShooterSpeed(int speed) {
+	public void setShooterSpeed(double speed) {
 		shooterMaster.set(speed);
+	}
+	
+	public double getShooterEncSpeed() {
+		return shooterMaster.getEncVelocity();
+	}
+	
+	public String getInfo() {
+		return "speed: " + shooterMaster.getSpeed() + "enc: " + shooterMaster.getEncVelocity() 
+		+ "outputV: " + shooterMaster.getOutputVoltage() + "Err: " + shooterMaster.getClosedLoopError();
 	}
 	
 }
