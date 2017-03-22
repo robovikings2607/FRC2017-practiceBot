@@ -67,20 +67,33 @@ public class AutonomousManager {
 	
 	public class CenterPeg extends AutonomousMode {
 		
+		Path path;
 		CenterPeg(Robot r) {
 			super(r);
+			TrajectoryGenerator.Config config = new TrajectoryGenerator.Config();
+			config.dt = .05;
+			config.max_acc = 5.0;//5
+			config.max_jerk = 30.0;
+			config.max_vel = 7.0;//7
+			
+			WaypointSequence p = new WaypointSequence(10);
+			p.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			p.addWaypoint(new WaypointSequence.Waypoint(7.0, 0.0, 0.0));
+			
+			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "CenterPeg");
 		}
 
 		@Override
 		public void run() {
-			Path p = this.getPathFromFile("/home/lvuser/centerPeg.txt");
-			
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , p);
+
+			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans, robot.rightTrans, path);
 			
 			try {
-				robot.shifter.set(true);
+				
+				robot.shifter.set(false);
 				robot.leftTrans.setHighGear(false , true);
 				robot.rightTrans.setHighGear(false , true);
+				
 				Thread.sleep(50);
 			} catch(Exception e) {}
 			
@@ -90,10 +103,10 @@ public class AutonomousManager {
 				while(!driver.isDone())
 					Thread.sleep(20);
 				robot.gearHandler.set(true);
-				Thread.sleep(10);
+				Thread.sleep(1000);
 				robot.leftTrans.set(-100);
 				robot.rightTrans.set(100);
-				Thread.sleep(251);
+				Thread.sleep(499);
 				robot.leftTrans.set(0);
 				robot.rightTrans.set(0);
 				robot.gearHandler.set(false);
@@ -137,7 +150,7 @@ public class AutonomousManager {
 			
 			try {
 				robot.gearHandler.set(false);
-				robot.shifter.set(true);
+				robot.shifter.set(false);
 				robot.leftTrans.setHighGear(false , true);
 				robot.rightTrans.setHighGear(false , true);
 				Thread.sleep(50);
