@@ -4,7 +4,6 @@ import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 
 public class Shooter {
@@ -28,12 +27,13 @@ public class Shooter {
 		shooterMaster.configPeakOutputVoltage(12.0, 0.0);
 		shooterMaster.setProfile(0);
 		
-		double kP = 102.3 / 1500.0; //0.2046
+		double kP = 102.3 / 2040.0; //0.050147
 		//shooterMotor.setF(1023.0 / 118200.0);		// set to (1023 / nativeVelocity)
-		shooterMaster.setF(1023.0 / 28700.0); //Max RPM 4100.0 @ 11.8 V //0.0365
-		shooterMaster.setP((kP * 1.2));		// start with 10% of error (native units)
+		shooterMaster.setF(1023.0 / 28340.0); //Max RPM 4100.0 @ 11.6 V
+		shooterMaster.setP((kP * 1.75)); //1.75		// start with 10% of error (native units)
 		shooterMaster.setI(0);
-		shooterMaster.setD(0);
+		shooterMaster.setD(kP * 30.0); //30.0
+		// k: * 2.25 and d: * 35.0 is too aggressive
 		logger = new PIDLogger(shooterMaster,"shooterWheel");
 		logger.start();
 	}
@@ -48,12 +48,17 @@ public class Shooter {
 		logger.enableLogging(false);
 	}
 	
+	public void usePID(boolean use) {
+		if(use) shooterMaster.changeControlMode(TalonControlMode.Speed);
+		else shooterMaster.changeControlMode(TalonControlMode.PercentVbus);
+		logger.enableLogging(use);
+	}
 	public void load(boolean switcher) {
 		if(switcher) loader.set(0.75);
 		else loader.set(0.0);
 	}
 
-	public void setShooterSpeed(double speed) {
+	public void set(double speed) {
 		shooterMaster.set(speed);
 		targetSpeed = speed;
 		logger.updSetpoint(speed);

@@ -9,7 +9,7 @@ public class Constants {
 	
 	public static final int shooterMotorMaster = 7;
 	public static final int shooterMotorFollower = 16;
-	public static final int turnTableMotor = 99;
+	public static final int turnTableMotor = 15;
 	public static final int loaderMotor = 2;
 	
 	

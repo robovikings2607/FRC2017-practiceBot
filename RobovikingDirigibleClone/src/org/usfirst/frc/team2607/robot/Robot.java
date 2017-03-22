@@ -30,8 +30,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
-	//Shooter shooter;
-	//Turret turret;
+	Shooter shooter;
+	Turret turret;
 	Climber climber;
 	public GearHandler gearHandler;
 	public Transmission leftTrans , rightTrans;
@@ -45,7 +45,6 @@ public class Robot extends IterativeRobot {
 	
 	double targetSpeed = 0.0, rightVoltage = 0.0, leftVoltage = 0.0;
 	double shooterTargetSpeed = 0.0;
-	boolean enableShooterPID = false;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -53,8 +52,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		//shooter = new Shooter();
-		//turret = new Turret();
+		shooter = new Shooter();
+		turret = new Turret();
 		climber = new Climber(Constants.climberMotor);
 		gearHandler = new GearHandler(Constants.gearSolenoid);
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
@@ -74,7 +73,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("leftVoltage", leftVoltage);
 		
 		SmartDashboard.putNumber("shooterTargetSpeed", shooterTargetSpeed);
-		SmartDashboard.putBoolean("enableShooterPID", enableShooterPID);
 
 		
 		// for tuning....webserver to view PID logs
@@ -205,7 +203,8 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		leftTrans.enablePID(true, false);
 		rightTrans.enablePID(true, false);
-		//shooter.disablePID();
+		shooter.usePID(true);
+		turret.useMagic(false);
 		shifter.set(true);
 	}
 
@@ -245,13 +244,14 @@ public class Robot extends IterativeRobot {
 		*/
 		
 		//SHOOTER STUFF-A-ROO
-		/*
-		shooter.setShooterSpeed(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
+		shooter.set(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
 		SmartDashboard.putNumber("shooterEncSpeed", shooter.getShooterEncSpeed());
-		System.out.println(shooter.getInfo());
 		shooter.load(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger));
-		*/
-		
+		SmartDashboard.putNumber("turretEncPosition" , turret.getEncPosition());
+		turret.set(opController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
+		//System.out.println(shooter.getInfo());
+		System.out.println(turret.getInfo());
+
 		shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
 		leftTrans.setHighGear(!shifter.get() , false);
 		
