@@ -16,6 +16,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.usfirst.frc.team2607.robot.auto.AutonomousEngine;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Talon;
@@ -30,8 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
-	Shooter shooter;
-	Turret turret;
+	//Shooter shooter;
+	//Turret turret;
 	Climber climber;
 	public GearHandler gearHandler;
 	public Transmission leftTrans , rightTrans;
@@ -42,6 +43,7 @@ public class Robot extends IterativeRobot {
 	public Solenoid flap;
 	Talon pickup;
 	Thread Autothread = null;
+	PDPLogger pdpLogger;
 	
 	double targetSpeed = 0.0, rightVoltage = 0.0, leftVoltage = 0.0;
 	double shooterTargetSpeed = 0.0;
@@ -52,8 +54,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		shooter = new Shooter();
-		turret = new Turret();
+		//shooter = new Shooter();
+		//turret = new Turret();
 		climber = new Climber(Constants.climberMotor);
 		gearHandler = new GearHandler(Constants.gearSolenoid);
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
@@ -67,6 +69,11 @@ public class Robot extends IterativeRobot {
 		opController = new RobovikingStick(Constants.operatorController);
 		autoEngine=new AutonomousEngine(this);
 		autoEngine.loadSavedMode();
+		
+		pdpLogger = new PDPLogger();
+		pdpLogger.start();
+		
+		gearHandler.set(true);
 		
 		SmartDashboard.putNumber("targetSpeed", targetSpeed);
 		SmartDashboard.putNumber("rightVoltage", rightVoltage);
@@ -198,14 +205,19 @@ public class Robot extends IterativeRobot {
 		}
 		
 	}
+	@Override
+	public void disabledInit() {
+		//pdpLogger.disable();
+	}
 	
 	@Override
 	public void teleopInit() {
 		leftTrans.enablePID(true, false);
 		rightTrans.enablePID(true, false);
-		shooter.usePID(true);
-		turret.useMagic(false);
+		//shooter.usePID(true);
+		//turret.useMagic(false);
 		shifter.set(true);
+		//pdpLogger.enable();
 	}
 
 	/**
@@ -214,27 +226,49 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		//TELEOP STUFF------------
+	//DRIVING
 		robotDrive.arcadeDrive(driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxLeftStickY) , 
 				driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
+		shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
+		leftTrans.setHighGear(!shifter.get() , false);
+		rightTrans.setHighGear(!shifter.get() , false);
 		
+	//CLIMBER
+		/*
 		if(opController.getPOV(0) == 0 )   {
 			climber.runForward();
 		} else if(opController.getPOV(0) == 180) {
 			climber.runBackwards();
 		} else {
-			climber.stopMotor();
+			climber.stop();
+		}
+		*/
+		
+		if(opController.getRawButton(RobovikingStick.xBoxButtonB) || driveController.getRawButton(RobovikingStick.xBoxButtonB)) {
+			climber.stop();
+		} else {
+			if(Math.abs(opController.getRawAxis(RobovikingStick.xBoxLeftStickY)) > 0.2 ) {
+				climber.run(opController.getRawAxis(RobovikingStick.xBoxLeftStickY));
+			} else {
+				climber.stop();
+			}
 		}
 		
-		//itsTheCliiiiiiiiiiiiiiiiiiiiiiimb.lockInPlace(opController.getToggleButton(RobovikingStick.xBoxButtonY));
-		
+	//BALL PICKUP
+		/*
 		if(opController.getRawButton(RobovikingStick.xBoxRightBumper)) {
-			pickup.set(-0.5);
+			pickup.set(-1.0);
 		} else if(opController.getRawButton(RobovikingStick.xBoxLeftBumper)) {
-			pickup.set(0.5);
+			pickup.set(1.0);
 		} else {
 			pickup.set(0.0);
 		}
+		*/
+		
+	//GEARS
+		gearHandler.set(!driveController.getRawButton(RobovikingStick.xBoxButtonA));
+		//TODO Add code for gear-handler ramp
+		
 		/*
 		SmartDashboard.putNumber("leftSpeed", leftTrans.getRate());
 		SmartDashboard.putNumber("rightSpeed", rightTrans.getRate());
@@ -243,7 +277,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("rightError", rightTrans.getError());
 		*/
 		
-		//SHOOTER STUFF-A-ROO
+	//SHOOTER STUFF-A-ROO
+		/*
 		shooter.set(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
 		SmartDashboard.putNumber("shooterEncSpeed", shooter.getShooterEncSpeed());
 		shooter.load(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger));
@@ -251,16 +286,7 @@ public class Robot extends IterativeRobot {
 		turret.set(opController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
 		//System.out.println(shooter.getInfo());
 		System.out.println(turret.getInfo());
-
-		shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
-		leftTrans.setHighGear(!shifter.get() , false);
-		
-		rightTrans.setHighGear(!shifter.get() , false);
-		gearHandler.set(driveController.getRawButton(RobovikingStick.xBoxButtonA));
-		climber.stop(driveController.getRawButton(RobovikingStick.xBoxButtonB));
-		//climber.stop(opController.getRawButton(RobovikingStick.xBoxButtonB));
-		
-		
+		*/
 	}
 
 	/**

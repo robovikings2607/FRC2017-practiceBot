@@ -3,7 +3,6 @@ package org.usfirst.frc.team2607.robot;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
-
 import edu.wpi.first.wpilibj.Talon;
 
 public class Shooter {

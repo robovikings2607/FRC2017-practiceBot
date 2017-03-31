@@ -12,6 +12,7 @@ public class PIDLogger extends Thread {
 	private double SP;
 	private long curTime, startTime;
 	File src;
+	private boolean hasEncoder = false;
 	
 	CANTalon srx;
 	
@@ -28,6 +29,7 @@ public class PIDLogger extends Thread {
 	public PIDLogger(CANTalon talonSRX , String dn){
 		srx = talonSRX;
 		deviceName = dn;
+		hasEncoder = srx.isControlEnabled(); //NEW LINE
 	}
 	
 	public void updSetpoint(double newSP) {
@@ -35,7 +37,7 @@ public class PIDLogger extends Thread {
 	}
 	
 	public void enableLogging(boolean enable) {
-	    	boolean okToEnable = enable;
+	    	boolean okToEnable = enable && hasEncoder;
 			if (enable && !loggingEnabled) {
 	    		if (logFile != null) {
 	    			logFile.close();

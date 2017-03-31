@@ -38,15 +38,17 @@ public class Climber {
 		}
 	}
 	
-	public void stop(boolean t){
-		//talonMotor.set(0.0);
-		//counter = 0;
-		climberBrake.set(t);
-	}
-	
-	public void stopMotor(){
+	public void stop(){
 		talonMotor.set(0.0);
 		counter = 0;
+		climberBrake.set(false);
+	}
+	
+	public void run(double speed) {
+		climberBrake.set(true);
+		counter++;
+		//TODO set talonMotor to a speed that stalls the motor while on the rope
+		if(counter >= 20) talonMotor.set(speed);
 	}
 	
 	public void lockInPlace(){
