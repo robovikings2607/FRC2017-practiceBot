@@ -15,6 +15,7 @@ public class Constants {
 	
 	public static final int pickupMotor = 0;
 	public static final int climberMotor = 1;
+	public static final int rampSolenoid = 3;
 	public static final int brakeSolenoid = 2;
 	public static final int gearSolenoid = 1;
 	public static final int shifterSolenoid = 0;
@@ -24,6 +25,10 @@ public class Constants {
 	public static final int operatorController = 1;
 	
 	public static final double kWheelbaseWidth = 29.872 / 12.0;
+	public static final boolean lowGear = false;
+	public static final boolean highGear = true;
+	public static final boolean gearOpen = false;
+	public static final boolean gearClosed = true;
 	
 	public static final double nativePerFoot = 3893.020921;  //2172.99549;
 	

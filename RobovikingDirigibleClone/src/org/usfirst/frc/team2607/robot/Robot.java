@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -54,6 +55,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		CameraServer.getInstance().startAutomaticCapture();
 		//shooter = new Shooter();
 		//turret = new Turret();
 		climber = new Climber(Constants.climberMotor);
@@ -73,7 +75,7 @@ public class Robot extends IterativeRobot {
 		pdpLogger = new PDPLogger();
 		pdpLogger.start();
 		
-		gearHandler.set(true);
+		gearHandler.setDoors(Constants.gearClosed);
 		
 		SmartDashboard.putNumber("targetSpeed", targetSpeed);
 		SmartDashboard.putNumber("rightVoltage", rightVoltage);
@@ -207,7 +209,7 @@ public class Robot extends IterativeRobot {
 	}
 	@Override
 	public void disabledInit() {
-		//pdpLogger.disable();
+		pdpLogger.disable();
 	}
 	
 	@Override
@@ -217,7 +219,7 @@ public class Robot extends IterativeRobot {
 		//shooter.usePID(true);
 		//turret.useMagic(false);
 		shifter.set(true);
-		//pdpLogger.enable();
+		pdpLogger.enable();
 	}
 
 	/**
@@ -266,7 +268,9 @@ public class Robot extends IterativeRobot {
 		*/
 		
 	//GEARS
-		gearHandler.set(!driveController.getRawButton(RobovikingStick.xBoxButtonA));
+		gearHandler.setDoors(!driveController.getRawButton(RobovikingStick.xBoxButtonA));
+		gearHandler.openRamp(opController.getRawButton(RobovikingStick.xBoxButtonA));
+		//gearHandler.useThePickUp(opController.getRawButton(RobovikingStick.xBoxButton));
 		//TODO Add code for gear-handler ramp
 		
 		/*

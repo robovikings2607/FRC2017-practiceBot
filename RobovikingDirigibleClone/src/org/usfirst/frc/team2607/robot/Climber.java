@@ -20,10 +20,10 @@ public class Climber {
 		talonMotor = new Talon(pwmChannel);
 		climberBrake = new Solenoid(Constants.pcmDeviceID, Constants.brakeSolenoid);
 		counter = 0;
-	 }
-	 
+	}
+	/*
 	public void runForward(){
-	 //climberBrake.set(true);
+	 climberBrake.set(true);
 	 counter ++;
 	 if(counter >= 20){ 
 		 talonMotor.set(1.0);	
@@ -31,13 +31,13 @@ public class Climber {
 	 }
 	
 	public void runBackwards(){
-		//climberBrake.set(true);
+		climberBrake.set(true);
 		counter++;
-		if(counter >= 20){
+		if(counter >= 5){
 			talonMotor.set(-1.0);
 		}
 	}
-	
+	*/
 	public void stop(){
 		talonMotor.set(0.0);
 		counter = 0;
@@ -48,7 +48,7 @@ public class Climber {
 		climberBrake.set(true);
 		counter++;
 		//TODO set talonMotor to a speed that stalls the motor while on the rope
-		if(counter >= 20) talonMotor.set(speed);
+		if(counter >= 5) talonMotor.set(speed);
 	}
 	
 	public void lockInPlace(){
