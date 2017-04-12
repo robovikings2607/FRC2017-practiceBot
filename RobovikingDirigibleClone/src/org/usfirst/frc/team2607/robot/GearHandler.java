@@ -1,30 +1,34 @@
 package org.usfirst.frc.team2607.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Talon;
 
 public class GearHandler {
 	
-	//TODO add a Solenoid (pneumatic control switch) object
-	Solenoid door , ramp;
-	//Solenoid pickUp;
+	Solenoid door , ramp , pickup;
+	Talon rollersOfYsgramor;
 	
 	
-	public GearHandler (int port){
-		//TODO set the Solenoid to a "port number" parameter
-		door = new Solenoid (Constants.pcmDeviceID , port);
+	public GearHandler (){
+		door = new Solenoid (Constants.pcmDeviceID , Constants.doorsSolenoid);
 		ramp = new Solenoid (Constants.pcmDeviceID, Constants.rampSolenoid);
-		//pickUp = new Solenoid (Constants.pcmDeviceID, Constants.pickUpSolenoid);
+		pickup = new Solenoid (Constants.pcmDeviceID, Constants.pickupSolenoid);
+		rollersOfYsgramor = new Talon(Constants.pickupRollersMotor);
 	}
 	public void setDoors(boolean t) {
 		door.set(t);
 	}
 	
-	public void openRamp (boolean wamp){
+	public void setRamp(boolean wamp){
 		ramp.set(wamp);
 	}
-		
-	public boolean get(){
-		return door.get();
+	
+	public void setPickup(boolean iceIceBaby) {
+		pickup.set(iceIceBaby);
+	}
+	
+	public void setRollers(double umLikeSeven) {
+		rollersOfYsgramor.set(umLikeSeven);
 	}
 }
 

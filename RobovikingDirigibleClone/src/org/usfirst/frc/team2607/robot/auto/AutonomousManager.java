@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import org.usfirst.frc.team2607.robot.Constants;
 import org.usfirst.frc.team2607.robot.Robot;
 import org.usfirst.frc.team2607.robot.RobovikingDriveTrainProfileDriver;
-import org.usfirst.frc.team2607.robot.RobovikingSRXDriveTrainFollower;
 
 import com.team254.lib.trajectory.Path;
 import com.team254.lib.trajectory.PathGenerator;
 import com.team254.lib.trajectory.TrajectoryGenerator;
-import com.team254.lib.trajectory.TrajectoryGenerator.Config;
 import com.team254.lib.trajectory.WaypointSequence;
 
 /**
@@ -25,12 +23,13 @@ public class AutonomousManager {
 	AutonomousManager(Robot robot){
 		this.robot = robot;
 		
+		
 		modes.add(new DoNothingFailsafe());
 		modes.add(new DoNothing());
 		modes.add(new CrossBaseline(robot));
 		modes.add(new CenterPeg(robot));
-		
-		//TODO add modes to test
+		modes.add(new LeftPeg(robot));
+		modes.add(new RightPeg(robot));
 	}
 	
 	public AutonomousMode getModeByName (String name){
@@ -137,12 +136,14 @@ public class AutonomousManager {
 	
 	public class CenterPeg extends AutonomousMode {
 		Path path;
+		
 		CenterPeg(Robot r) {
+			super(r);
 			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
 			config.dt = 0.05;
-			config.max_acc = 4.5;
+			config.max_acc = 4.0;
 			config.max_jerk= 25.0;
-			config.max_vel = 7.0;
+			config.max_vel = 5.0;
 			
 			WaypointSequence p = new WaypointSequence(10);
 			p.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
@@ -150,28 +151,23 @@ public class AutonomousManager {
 			
 			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "CenterPeg");
 		}
+		
 		@Override
 		public void run() {
-			robot.gearHandler.setDoors(Constants.gearClosed);
-			robot.shifter.set(Constants.lowGear);
-			robot.leftTrans.setHighGear(false, true);
-			robot.rightTrans.setHighGear(false, true);
-			
-			try{ Thread.sleep(250);} catch(Exception e) {System.out.println("Error waiting for shifters to shift...");}
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path);
-			driver.followPathBACKWARDS();
-			try { 
-				while (!driver.isDone()) {
-					Thread.sleep(20);
-				}
-				robot.gearHandler.setDoors(Constants.gearOpen);
+			robot.setupAutonConfig();
+			try{ 
+				Thread.sleep(250);
+				RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path);
+				driver.followPathBACKWARDS();
+				while (!driver.isDone()) Thread.sleep(20);
+				//robot.gearHandler.setDoors(Constants.gearOpen);
 				Thread.sleep(500);
 				robot.leftTrans.set(-100);
 				robot.rightTrans.set(100);
 				Thread.sleep(300);
 				robot.leftTrans.set(0);
 				robot.rightTrans.set(0);
-				robot.gearHandler.setDoors(Constants.gearClosed);
+				//robot.gearHandler.setDoors(Constants.gearClosed);
 				robot.shifter.set(Constants.highGear);
 				robot.leftTrans.setHighGear(true, false);
 				robot.rightTrans.setHighGear(true, false);
@@ -401,224 +397,150 @@ public class AutonomousManager {
 		}
 	}
 	
+	/*	PALISADES AUTONOMOUS MEASUREMENTS
+	 * 	<> alliance wall & human player station corner ( center of gear handler --> left peg guide rail)
+	 * 		- drive straight 67in.
+	 * 		- rotate 60 deg.
+	 * 		- drive straight 60in.
+	 * 
+	 *  <> alliance wall & boiler corner (center of gear handler --> right peg guide rail)
+	 *  	- drive straight 38in.
+	 *  	- rotate -60 deg. 
+	 *  	- drive straight 107in.
+	 */
 	
-	/*
-	public class CenterPeg extends AutonomousMode {
-		
-		Path path;
-		CenterPeg(Robot r) {
-			super(r);
-			TrajectoryGenerator.Config config = new TrajectoryGenerator.Config();
-			config.dt = .05;
-			config.max_acc = 5.0;//5
-			config.max_jerk = 30.0;
-			config.max_vel = 7.0;//7
-			
-			WaypointSequence p = new WaypointSequence(10);
-			p.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(7.0, 0.0, 0.0));
-			
-			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "CenterPeg");
-		}
-
-		@Override
-		public void run() {
-
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans, robot.rightTrans, path);
-			
-			try {
-				
-				robot.shifter.set(false);
-				robot.leftTrans.setHighGear(false , true);
-				robot.rightTrans.setHighGear(false , true);
-				
-				Thread.sleep(50);
-			} catch(Exception e) {}
-			
-			driver.followPathBACKWARDS();
-			
-			try {
-				while(!driver.isDone())
-					Thread.sleep(20);
-				robot.gearHandler.setDoors(true);
-				Thread.sleep(1000);
-				robot.leftTrans.set(-100);
-				robot.rightTrans.set(100);
-				Thread.sleep(499);
-				robot.leftTrans.set(0);
-				robot.rightTrans.set(0);
-				robot.gearHandler.setDoors(false);
-			} catch( Exception e) {}
-		}
-
-		@Override
-		public String getName() {
-			
-			return "CenterPeg";
-		}
-		
-	}
-	
-
+	//TODO Add a switch to invert the angles that we turn at, since the red alliance wall is not the same as the blue alliance wall
 	public class LeftPeg extends AutonomousMode {
-		
-		Path path;
+		private Path path_0 , path_1 , path_2;
 		
 		LeftPeg(Robot r) {
 			super(r);
-			TrajectoryGenerator.Config config = new TrajectoryGenerator.Config();
-			config.dt = .05;
-			config.max_acc = 5.0;
-			config.max_jerk = 30.0;
-			config.max_vel = 7.0;
 			
-			WaypointSequence p = new WaypointSequence(10);
-			p.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(6.45, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(8.95 , -1.9 , 5.1));
-			//p.addWaypoint(new WaypointSequence.Waypoint(7.5, -1.75, 5.6));  // heading 5.6 turned left instead of right since we follow backwards
-			//p.addWaypoint(new WaypointSequence.Waypoint(13.7, 2.3, 1.5));
+			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
+			config.dt = 0.05;
+			config.max_acc = 4.0;
+			config.max_jerk= 25.0;
+			config.max_vel = 5.0;
 			
-			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "LeftPeg");
+			WaypointSequence waypoints_0 = new WaypointSequence(10);
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(6.9 , 0.0 , 0.0));
+			path_0 = PathGenerator.makePath(waypoints_0, config, Constants.kWheelbaseWidth, "LeftPeg_0");
 			
+			WaypointSequence waypoints_1 = new WaypointSequence(10);
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(6.0, 0.0, 0.0));
+			path_1 = PathGenerator.makePath(waypoints_1, config, Constants.kWheelbaseWidth, "LeftPeg_1");
+			
+			WaypointSequence waypoints_2 = new WaypointSequence(10);
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
+			path_2 = PathGenerator.makePath(waypoints_2, config, Constants.kWheelbaseWidth, "LeftPeg_2");
 		}
-
+		
 		@Override
 		public void run() {
-			
+			robot.setupAutonConfig();
 			try {
-				robot.gearHandler.setDoors(false);
-				robot.shifter.set(false);
-				robot.leftTrans.setHighGear(false , true);
-				robot.rightTrans.setHighGear(false , true);
-				Thread.sleep(50);
-			} catch(Exception e) {}
-			
-			System.out.println("running LeftPeg auton....");
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans, robot.rightTrans, path);
-			driver.followPathBACKWARDS();
-			try {
-				while (!driver.isDone()) {
-					Thread.sleep(20);
-				}
-			} catch (Exception e) {
-				System.out.println("....LeftPeg path interrupted");
-			}
-			
-			System.out.println("done LeftPeg");
+				Thread.sleep(250); //WAITING FOR SHIFTERS
+				RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_0);
+				driver.followPathBACKWARDS();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				robot.rotateDeg(60.0);
+				Thread.sleep(30);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+				driver.followPathBACKWARDS();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				System.out.println("RELEASE GEAR NOW!");
+				//TODO Release Gear
+				//robot.gearHandler.setDoors(Constants.gearOpen);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+				driver.followPath();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				robot.rotateDeg(-60.0);
+				Thread.sleep(30);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_2);
+				driver.followPathBACKWARDS();
+			} catch (Exception e) { System.out.println("ERROR: stopping autonomous"); }
 		}
+		
+		
 
 		@Override
 		public String getName() {
-			return "LeftPeg";
+			// TODO Auto-generated method stub
+			return "03-LeftPeg";
 		}
 		
 	}
 	
-public class RightPeg extends AutonomousMode {
-		
-		Path path;
+	public class RightPeg extends AutonomousMode {
+		private Path path_0 , path_1 , path_2;
 		
 		RightPeg(Robot r) {
 			super(r);
-			TrajectoryGenerator.Config config = new TrajectoryGenerator.Config();
-			config.dt = .05;
-			config.max_acc = 5.0;
-			config.max_jerk = 30.0;
-			config.max_vel = 7.0;
 			
-			WaypointSequence p = new WaypointSequence(10);
-			p.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(4.5, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(7.1 , 3.6 , 1.55));
-			//p.addWaypoint(new WaypointSequence.Waypoint(7.5, -1.75, 5.6));  // heading 5.6 turned left instead of right since we follow backwards
-			//p.addWaypoint(new WaypointSequence.Waypoint(13.7, 2.3, 1.5));
+			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
+			config.dt = 0.05;
+			config.max_acc = 4.0;
+			config.max_jerk= 25.0;
+			config.max_vel = 5.0;
 			
-			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "rightPeg");
+			WaypointSequence waypoints_0 = new WaypointSequence(10);
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(5.0 , 0.0 , 0.0));
+			path_0 = PathGenerator.makePath(waypoints_0, config, Constants.kWheelbaseWidth, "RightPeg_0");
 			
+			WaypointSequence waypoints_1 = new WaypointSequence(10);
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(7.5, 0.0, 0.0));
+			path_1 = PathGenerator.makePath(waypoints_1, config, Constants.kWheelbaseWidth, "RightPeg_1");
+			
+			WaypointSequence waypoints_2 = new WaypointSequence(10);
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
+			path_2 = PathGenerator.makePath(waypoints_2, config, Constants.kWheelbaseWidth, "RightPeg_2");
 		}
-
+		
 		@Override
 		public void run() {
-			
+			robot.setupAutonConfig();
 			try {
-				robot.gearHandler.setDoors(false);
-				robot.shifter.set(true);
-				robot.leftTrans.setHighGear(false , true);
-				robot.rightTrans.setHighGear(false , true);
-				Thread.sleep(50);
-			} catch(Exception e) {}
-			
-			System.out.println("running RightPeg auton....");
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans, robot.rightTrans, path);
-			driver.followPathBACKWARDS();
-			try {
-				while (!driver.isDone()) {
-					Thread.sleep(20);
-				}
-			} catch (Exception e) {
-				System.out.println("....RightPeg path interrupted");
-			}
-			
-			System.out.println("done RightPeg");
+				Thread.sleep(250); //WAITING FOR SHIFTERS
+				RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_0);
+				driver.followPathBACKWARDS();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				robot.rotateDeg(-58.3);
+				Thread.sleep(30);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+				driver.followPathBACKWARDS();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				System.out.println("RELEASE GEAR NOW!");
+				//TODO Release Gear
+				//robot.gearHandler.setDoors(Constants.gearOpen);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+				driver.followPath();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				robot.rotateDeg(58.3);
+				Thread.sleep(30);
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_2);
+				driver.followPathBACKWARDS();
+			} catch (Exception e) { System.out.println("ERROR: stopping autonomous"); }
 		}
+		
+		
 
 		@Override
 		public String getName() {
-			return "RightPeg";
+			// TODO Auto-generated method stub
+			return "04-RightPeg";
 		}
 		
 	}
-
-	public class StraightTest extends AutonomousMode {
-
-		Path path; 
-		
-		StraightTest(Robot r){
-			super(r);
-			TrajectoryGenerator.Config config = new TrajectoryGenerator.Config();
-			config.dt = .05;
-			config.max_acc = 7.0;
-			config.max_jerk = 30.0;
-			config.max_vel = 7.0;
-			
-			WaypointSequence p = new WaypointSequence(10);
-			p.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
-			p.addWaypoint(new WaypointSequence.Waypoint(6.5,0.0,0.0));
-			
-			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "LeftPeg");
-		}
-
-		@Override
-		public void run() {
-			System.out.println("testing a straight line for distance accuracy");
-			try {
-				robot.shifter.set(true);
-				robot.leftTrans.setHighGear(false , true);
-				robot.rightTrans.setHighGear(false , true);
-				Thread.sleep(50);
-			} catch(Exception e) {}
-
-			System.out.println("running StraightTest auton....");
-			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans, robot.rightTrans, path);
-			driver.followPathBACKWARDS();
-			try {
-				while (!driver.isDone()) {
-					Thread.sleep(20);
-				}
-			} catch (Exception e) {
-				System.out.println("....StraightTest path interrupted");
-			}
-			
-			System.out.println("done StraightTest");
-
-		}
-
-		@Override
-		public String getName() {
-			return "StraightTest";
-		}
-		
-	}
-	*/
 }
