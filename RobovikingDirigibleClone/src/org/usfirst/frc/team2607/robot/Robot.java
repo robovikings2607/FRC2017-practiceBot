@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -44,6 +45,7 @@ public class Robot extends IterativeRobot {
 	AutonomousEngine autoEngine;
 	public Solenoid shifter;
 	Thread Autothread = null;
+	DigitalInput pegSensor;
 	PDPLogger pdpLogger;
 	public AHRS gyro;
 	
@@ -56,9 +58,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		//CameraServer.getInstance().startAutomaticCapture();
+		CameraServer.getInstance().startAutomaticCapture();
 		climber = new Climber(Constants.climberMotor);
 		gearHandler = new GearHandler();
+		pegSensor = new DigitalInput(0);
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
 		rightTrans = new Transmission(Constants.rightMotorA , Constants.rightMotorB , "Right Transmission");
 		shifter = new Solenoid(Constants.pcmDeviceID , Constants.shifterSolenoid);
@@ -223,7 +226,7 @@ public class Robot extends IterativeRobot {
 		gearHandler.setPickup(opController.getRawButton(RobovikingStick.xBoxButtonA));
 		
 		if(opController.getRawButton(RobovikingStick.xBoxRightBumper)) gearHandler.setRollers(1.0);
-		else if(opController.getRawButton(RobovikingStick.xBoxLeftBumper)) gearHandler.setRollers(-1.0);
+		else if(opController.getRawButton(RobovikingStick.xBoxLeftBumper)) gearHandler.setRollers(-0.5);
 		else gearHandler.setRollers(0.0);
 		
 		/*
@@ -236,7 +239,8 @@ public class Robot extends IterativeRobot {
 		
 	//CONSOLE MESSAGES
 		if(ick++ > 25) {
-			System.out.println("Yaw: " + gyro.getYaw());
+			//System.out.println("Yaw: " + gyro.getYaw());
+			System.out.println("Photoeye: " + pegSensor.get());
 			ick = 0;
 		}
 	}
@@ -285,8 +289,8 @@ public class Robot extends IterativeRobot {
 			deltaTime = System.currentTimeMillis() - startTime;
 			robotDrive.arcadeDrive(0.0, calcTurn(target));
 			if(calcTurn(target) == 0.0) idek++;
-			if(idek > 12) keepZeroing = false;
-			if(deltaTime >= 3000){ System.out.println("TIMED OUT: rotation could not be completed"); keepZeroing = false;}
+			if(idek > 20) keepZeroing = false;
+			else if(deltaTime >= 5000){ System.out.println("TIMED OUT: rotation could not be completed"); keepZeroing = false;}
 		}
 		
 	}

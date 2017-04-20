@@ -422,6 +422,12 @@ public class AutonomousManager {
 			config.max_jerk= 25.0;
 			config.max_vel = 5.0;
 			
+			TrajectoryGenerator.Config config_alt =new TrajectoryGenerator.Config();
+			config_alt.dt = 0.05;
+			config_alt.max_acc = 6.0;
+			config_alt.max_jerk= 25.0;
+			config_alt.max_vel = 9.0;
+			
 			WaypointSequence waypoints_0 = new WaypointSequence(10);
 			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
 			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(6.9 , 0.0 , 0.0));
@@ -435,7 +441,7 @@ public class AutonomousManager {
 			WaypointSequence waypoints_2 = new WaypointSequence(10);
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
-			path_2 = PathGenerator.makePath(waypoints_2, config, Constants.kWheelbaseWidth, "LeftPeg_2");
+			path_2 = PathGenerator.makePath(waypoints_2, config_alt, Constants.kWheelbaseWidth, "LeftPeg_2");
 		}
 		
 		@Override
@@ -447,7 +453,7 @@ public class AutonomousManager {
 				driver.followPathBACKWARDS();
 				while(!driver.isDone()) Thread.sleep(20);
 				
-				robot.rotateDeg(60.0);
+				robot.rotateDeg(61.3);
 				Thread.sleep(30);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
 				driver.followPathBACKWARDS();
@@ -455,12 +461,12 @@ public class AutonomousManager {
 				
 				System.out.println("RELEASE GEAR NOW!");
 				//TODO Release Gear
-				//robot.gearHandler.setDoors(Constants.gearOpen);
+				robot.gearHandler.setDoors(Constants.gearOpen);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
 				driver.followPath();
 				while(!driver.isDone()) Thread.sleep(20);
 				
-				robot.rotateDeg(-60.0);
+				robot.rotateDeg(-61.3);
 				Thread.sleep(30);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_2);
 				driver.followPathBACKWARDS();
@@ -489,6 +495,12 @@ public class AutonomousManager {
 			config.max_jerk= 25.0;
 			config.max_vel = 5.0;
 			
+			TrajectoryGenerator.Config config_alt =new TrajectoryGenerator.Config();
+			config_alt.dt = 0.05;
+			config_alt.max_acc = 6.0;
+			config_alt.max_jerk= 25.0;
+			config_alt.max_vel = 9.0;
+			
 			WaypointSequence waypoints_0 = new WaypointSequence(10);
 			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
 			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(5.0 , 0.0 , 0.0));
@@ -502,7 +514,7 @@ public class AutonomousManager {
 			WaypointSequence waypoints_2 = new WaypointSequence(10);
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
-			path_2 = PathGenerator.makePath(waypoints_2, config, Constants.kWheelbaseWidth, "RightPeg_2");
+			path_2 = PathGenerator.makePath(waypoints_2, config_alt, Constants.kWheelbaseWidth, "RightPeg_2");
 		}
 		
 		@Override
@@ -522,7 +534,7 @@ public class AutonomousManager {
 				
 				System.out.println("RELEASE GEAR NOW!");
 				//TODO Release Gear
-				//robot.gearHandler.setDoors(Constants.gearOpen);
+				robot.gearHandler.setDoors(Constants.gearOpen);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
 				driver.followPath();
 				while(!driver.isDone()) Thread.sleep(20);
