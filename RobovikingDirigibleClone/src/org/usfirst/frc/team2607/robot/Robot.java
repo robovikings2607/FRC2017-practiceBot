@@ -1,32 +1,21 @@
 package org.usfirst.frc.team2607.robot;
-/*
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-/*
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-*/
+
 import org.usfirst.frc.team2607.robot.auto.AutonomousEngine;
 
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -45,9 +34,10 @@ public class Robot extends IterativeRobot {
 	AutonomousEngine autoEngine;
 	public Solenoid shifter;
 	Thread Autothread = null;
-	DigitalInput pegSensor;
 	PDPLogger pdpLogger;
 	public AHRS gyro;
+	
+	public Shooter shooter;
 	
 	double targetSpeed = 0.0, rightVoltage = 0.0, leftVoltage = 0.0;
 	double shooterTargetSpeed = 0.0;
@@ -58,10 +48,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		CameraServer.getInstance().startAutomaticCapture();
+		//CameraServer.getInstance().startAutomaticCapture();
+		//CameraServer.getInstance().startAutomaticCapture(0);
+		//CameraServer.getInstance().startAutomaticCapture(1);
+		
 		climber = new Climber(Constants.climberMotor);
 		gearHandler = new GearHandler();
-		pegSensor = new DigitalInput(0);
 		leftTrans = new Transmission(Constants.leftMotorA , Constants.leftMotorB , "Left Transmission");
 		rightTrans = new Transmission(Constants.rightMotorA , Constants.rightMotorB , "Right Transmission");
 		shifter = new Solenoid(Constants.pcmDeviceID , Constants.shifterSolenoid);
@@ -73,6 +65,8 @@ public class Robot extends IterativeRobot {
 		autoEngine=new AutonomousEngine(this);
 		autoEngine.loadSavedMode();
 		
+		shooter = new Shooter();
+		
 		pdpLogger = new PDPLogger();
 		pdpLogger.start();
 		
@@ -81,10 +75,11 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("targetSpeed", targetSpeed);
 		SmartDashboard.putNumber("rightVoltage", rightVoltage);
 		SmartDashboard.putNumber("leftVoltage", leftVoltage);
+		SmartDashboard.putNumber("shooterTargetSpeed", shooterTargetSpeed);
 
 		
 		// for tuning....webserver to view PID logs
-		/*
+		
     	Server server = new Server(5804);
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(5804);
@@ -106,7 +101,7 @@ public class Robot extends IterativeRobot {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		*/
+		
 	}
 	
 	int autonSwitch = 0;
@@ -188,8 +183,9 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		leftTrans.enablePID(true, false);
 		rightTrans.enablePID(true, false);
-		shifter.set(true);
+		shifter.set(Constants.highGear);
 		pdpLogger.enable();
+		shooter.usePID(false);
 	}
 
 	/**
@@ -201,7 +197,7 @@ public class Robot extends IterativeRobot {
 		
 	//DRIVING
 		if(driveController.getTriggerPressed(RobovikingStick.xBoxRightTrigger)) {
-			robotDrive.arcadeDrive(0.0 , calcTurn(45.0));
+			robotDrive.arcadeDrive(0.0 , calcTurn(SmartDashboard.getNumber("degToRotate", 0.0)));
 		} else {
 			robotDrive.arcadeDrive(driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxLeftStickY) , 
 					driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
@@ -229,6 +225,14 @@ public class Robot extends IterativeRobot {
 		else if(opController.getRawButton(RobovikingStick.xBoxLeftBumper)) gearHandler.setRollers(-0.5);
 		else gearHandler.setRollers(0.0);
 		
+	//SHOOTER?
+		if(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger)) 
+			shooter.set(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
+		else if(opController.getTriggerPressed(RobovikingStick.xBoxLeftTrigger)) shooter.set(0.85);
+		else shooter.set(0.0);
+		if(opController.getRawButton(RobovikingStick.xBoxButtonX)) shooter.load(true);
+		else shooter.load(false);
+		
 		/*
 		SmartDashboard.putNumber("leftSpeed", leftTrans.getRate());
 		SmartDashboard.putNumber("rightSpeed", rightTrans.getRate());
@@ -240,7 +244,7 @@ public class Robot extends IterativeRobot {
 	//CONSOLE MESSAGES
 		if(ick++ > 25) {
 			//System.out.println("Yaw: " + gyro.getYaw());
-			System.out.println("Photoeye: " + pegSensor.get());
+			System.out.println(shooter.getInfo());
 			ick = 0;
 		}
 	}

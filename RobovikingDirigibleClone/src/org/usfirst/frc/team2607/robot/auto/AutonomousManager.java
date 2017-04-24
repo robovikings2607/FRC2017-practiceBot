@@ -30,6 +30,7 @@ public class AutonomousManager {
 		modes.add(new CenterPeg(robot));
 		modes.add(new LeftPeg(robot));
 		modes.add(new RightPeg(robot));
+		modes.add(new LeftPegAlt(robot));
 	}
 	
 	public AutonomousMode getModeByName (String name){
@@ -453,7 +454,7 @@ public class AutonomousManager {
 				driver.followPathBACKWARDS();
 				while(!driver.isDone()) Thread.sleep(20);
 				
-				robot.rotateDeg(61.3);
+				robot.rotateDeg(62.5);
 				Thread.sleep(30);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
 				driver.followPathBACKWARDS();
@@ -466,7 +467,7 @@ public class AutonomousManager {
 				driver.followPath();
 				while(!driver.isDone()) Thread.sleep(20);
 				
-				robot.rotateDeg(-61.3);
+				robot.rotateDeg(-62.5);
 				Thread.sleep(30);
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_2);
 				driver.followPathBACKWARDS();
@@ -554,5 +555,134 @@ public class AutonomousManager {
 			return "04-RightPeg";
 		}
 		
+	}
+	
+	public class CenterPegAlt extends AutonomousMode {
+		Path path_0, path_1;
+		
+		CenterPegAlt(Robot r) {
+			super(r);
+			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
+			config.dt = 0.05;
+			config.max_acc = 4.0;
+			config.max_jerk= 25.0;
+			config.max_vel = 5.0;
+			
+			WaypointSequence waypoint_0 = new WaypointSequence(10);
+			waypoint_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
+			waypoint_0.addWaypoint(new WaypointSequence.Waypoint(7.3 , 0.0 , 0.0));
+			path_0 = PathGenerator.makePath(waypoint_0, config, Constants.kWheelbaseWidth, "CenterPeg_0");
+			
+			WaypointSequence waypoint_1 = new WaypointSequence(10);
+			waypoint_1.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
+			waypoint_1.addWaypoint(new WaypointSequence.Waypoint(4.0 , 0.0 , 0.0));
+			path_1 = PathGenerator.makePath(waypoint_1, config, Constants.kWheelbaseWidth, "CenterPeg_1");
+		}
+		
+		@Override
+		public void run() {
+			robot.setupAutonConfig();
+			try{ 
+				Thread.sleep(250);
+				RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_0);
+				driver.followPath();
+				while (!driver.isDone()) Thread.sleep(20);
+				
+				robot.gearHandler.setPickup(true);
+				Thread.sleep(10);
+				
+				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+				driver.followPathBACKWARDS();
+				while(!driver.isDone()) Thread.sleep(20);
+				
+				robot.gearHandler.setPickup(false);
+				Thread.sleep(30);
+				
+				robot.rotateDeg(14.3);
+				Thread.sleep(30);
+				
+				robot.shooter.set(0.85);
+				Thread.sleep(250);
+				robot.shooter.load(true);
+				Thread.sleep(10000);
+				robot.shooter.load(false);
+				robot.shooter.set(0.0);
+				
+			} catch (Exception e) {}
+		}
+		@Override
+		public String getName() {
+			return "02-CenterPeg";
+		}
+	}
+
+	public class LeftPegAlt extends AutonomousMode {
+		private Path path_0 , path_1 , path_2;
+		
+		public LeftPegAlt(Robot r)	{
+			super(r);
+			
+			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
+			config.dt = 0.05;
+			config.max_acc = 4.0;
+			config.max_jerk= 25.0;
+			config.max_vel = 5.0;
+			
+			TrajectoryGenerator.Config config_alt =new TrajectoryGenerator.Config();
+			config_alt.dt = 0.05;
+			config_alt.max_acc = 6.0;
+			config_alt.max_jerk= 25.0;
+			config_alt.max_vel = 9.0;
+			
+			WaypointSequence waypoints_0 = new WaypointSequence(10);
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
+			waypoints_0.addWaypoint(new WaypointSequence.Waypoint(6.9 , 0.0 , 0.0));
+			path_0 = PathGenerator.makePath(waypoints_0, config, Constants.kWheelbaseWidth, "LeftPeg_0");
+			
+			WaypointSequence waypoints_1 = new WaypointSequence(10);
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_1.addWaypoint(new WaypointSequence.Waypoint(6.0, 0.0, 0.0));
+			path_1 = PathGenerator.makePath(waypoints_1, config, Constants.kWheelbaseWidth, "LeftPeg_1");
+			
+			WaypointSequence waypoints_2 = new WaypointSequence(10);
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
+			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
+			path_2 = PathGenerator.makePath(waypoints_2, config_alt, Constants.kWheelbaseWidth, "LeftPeg_2");
+		}
+		
+		 @Override
+		public void run() {
+			 robot.setupAutonConfig();
+				try {
+					Thread.sleep(250); //WAITING FOR SHIFTERS
+					RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_0);
+					driver.followPath();
+					while(!driver.isDone()) Thread.sleep(20);
+					
+					robot.rotateDeg(62.5);
+					Thread.sleep(30);
+					driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+					driver.followPath();
+					while(!driver.isDone()) Thread.sleep(20);
+					
+					System.out.println("RELEASE GEAR NOW!");
+					//TODO Release Gear
+					robot.gearHandler.setPickup(true);
+					driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
+					driver.followPath();
+					while(!driver.isDone()) Thread.sleep(20);
+					
+					robot.gearHandler.setPickup(false);
+					Thread.sleep(20);
+					robot.rotateDeg(-62.5);
+					Thread.sleep(30);
+					driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_2);
+					driver.followPath();
+				} catch (Exception e) { System.out.println("ERROR: stopping autonomous"); }
+		}
+		@Override
+		public String getName() {
+			return "LegPegAlt";
+		}
 	}
 }
