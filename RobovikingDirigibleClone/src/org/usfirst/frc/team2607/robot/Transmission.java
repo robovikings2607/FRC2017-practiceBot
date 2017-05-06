@@ -85,14 +85,14 @@ public class Transmission implements SpeedController{
 	
 	public void setMotionProfileLowGearGains() {
 		if(name.equalsIgnoreCase("Right Transmission")) {
-			double Kp = 380.0 / 300.0; //10.1 // 380.0 / 300.0
-			motor1.setF((1023.00 / 3000.0) * 1.045); // set to (1023 / nativeVelocity)
+			double Kp = 102.3 / 170.0; //10.1 // 380.0 / 300.0
+			motor1.setF((1023.00 / 3000.0) * 0.96); // set to (1023 / nativeVelocity) 1.045
 			motor1.setP(Kp);
 			motor1.setI(0);
 			motor1.setD(Kp * 10.0);
 		} else {	
-			double Kp = 380.0 / 300.0;  //44.8 // 380.0 / 300.0
-			motor1.setF((1023.0 / 2848.00) * 1.02); // set to (1023 / nativeVelocity)
+			double Kp = 102.3 / 170.0;  //44.8 // 380.0 / 300.0
+			motor1.setF((1023.0 / 2848.00) * 1.0); // set to (1023 / nativeVelocity)
 			motor1.setP(Kp);					// start with 10% of error (native units)
 			motor1.setI(0);
 			motor1.setD(Kp * 10.0);

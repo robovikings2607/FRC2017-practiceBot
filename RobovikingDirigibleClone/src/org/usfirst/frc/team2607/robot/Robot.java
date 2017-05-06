@@ -11,6 +11,7 @@ import org.usfirst.frc.team2607.robot.auto.AutonomousEngine;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SPI.Port;
@@ -49,7 +50,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		//CameraServer.getInstance().startAutomaticCapture();
-		//CameraServer.getInstance().startAutomaticCapture(0);
+		CameraServer.getInstance().startAutomaticCapture(0);
 		//CameraServer.getInstance().startAutomaticCapture(1);
 		
 		climber = new Climber(Constants.climberMotor);
@@ -116,7 +117,7 @@ public class Robot extends IterativeRobot {
 			autonModeRan = true;
 			break;
 		case 1: //Run PID loop from SmartDash input
-			shifter.set(true);
+			shifter.set(Constants.lowGear);
 			leftTrans.setHighGear(false , true);
 			rightTrans.setHighGear(false , true);
 			leftTrans.enablePID(true, true);
@@ -226,9 +227,9 @@ public class Robot extends IterativeRobot {
 		else gearHandler.setRollers(0.0);
 		
 	//SHOOTER?
-		if(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger)) 
+		if(opController.getTriggerPressed(RobovikingStick.xBoxLeftTrigger)) 
 			shooter.set(SmartDashboard.getNumber("shooterTargetSpeed", 0.0));
-		else if(opController.getTriggerPressed(RobovikingStick.xBoxLeftTrigger)) shooter.set(0.85);
+		else if(opController.getTriggerPressed(RobovikingStick.xBoxRightTrigger)) shooter.set(0.85);
 		else shooter.set(0.0);
 		if(opController.getRawButton(RobovikingStick.xBoxButtonX)) shooter.load(true);
 		else shooter.load(false);

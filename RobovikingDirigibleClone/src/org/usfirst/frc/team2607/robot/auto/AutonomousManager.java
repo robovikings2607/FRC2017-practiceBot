@@ -23,14 +23,14 @@ public class AutonomousManager {
 	AutonomousManager(Robot robot){
 		this.robot = robot;
 		
-		
 		modes.add(new DoNothingFailsafe());
 		modes.add(new DoNothing());
 		modes.add(new CrossBaseline(robot));
-		modes.add(new CenterPeg(robot));
-		modes.add(new LeftPeg(robot));
-		modes.add(new RightPeg(robot));
-		modes.add(new LeftPegAlt(robot));
+		//modes.add(new CenterPeg(robot));
+		//modes.add(new LeftPeg(robot));
+		//modes.add(new RightPeg(robot));
+		//modes.add(new LeftPegAlt(robot));
+		modes.add(new CenterPegAlt(robot));
 	}
 	
 	public AutonomousMode getModeByName (String name){
@@ -104,9 +104,9 @@ public class AutonomousManager {
 		CrossBaseline(Robot r) {
 			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
 			config.dt = 0.05;
-			config.max_acc = 9.0;
+			config.max_acc = 5.0;
 			config.max_jerk= 25.0;
-			config.max_vel =10.0;
+			config.max_vel =7.0;
 			
 			WaypointSequence p = new WaypointSequence(10);
 			p.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
@@ -122,7 +122,7 @@ public class AutonomousManager {
 			
 			try{ Thread.sleep(250);} catch(Exception e) {System.out.println("Error waiting for shifters to shift...");}
 			RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path);
-			driver.followPathBACKWARDS();
+			driver.followPath();
 			try { 
 				while (!driver.isDone()) {
 					Thread.sleep(20);
@@ -564,9 +564,9 @@ public class AutonomousManager {
 			super(r);
 			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
 			config.dt = 0.05;
-			config.max_acc = 4.0;
+			config.max_acc = 3.0;
 			config.max_jerk= 25.0;
-			config.max_vel = 5.0;
+			config.max_vel = 4.0;
 			
 			WaypointSequence waypoint_0 = new WaypointSequence(10);
 			waypoint_0.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
@@ -589,7 +589,7 @@ public class AutonomousManager {
 				while (!driver.isDone()) Thread.sleep(20);
 				
 				robot.gearHandler.setPickup(true);
-				Thread.sleep(10);
+				Thread.sleep(50);
 				
 				driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path_1);
 				driver.followPathBACKWARDS();
@@ -598,13 +598,13 @@ public class AutonomousManager {
 				robot.gearHandler.setPickup(false);
 				Thread.sleep(30);
 				
-				robot.rotateDeg(14.3);
+				robot.rotateDeg(16.0);
 				Thread.sleep(30);
 				
-				robot.shooter.set(0.85);
-				Thread.sleep(250);
+				robot.shooter.set(1.0);
+				Thread.sleep(320);
 				robot.shooter.load(true);
-				Thread.sleep(10000);
+				Thread.sleep(5000);
 				robot.shooter.load(false);
 				robot.shooter.set(0.0);
 				
@@ -612,7 +612,7 @@ public class AutonomousManager {
 		}
 		@Override
 		public String getName() {
-			return "02-CenterPeg";
+			return "CenterPegAlt";
 		}
 	}
 
