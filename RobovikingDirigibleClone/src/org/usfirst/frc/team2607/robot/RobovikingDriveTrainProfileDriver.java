@@ -21,7 +21,7 @@ public class RobovikingDriveTrainProfileDriver {
 	private boolean running = false, done = false;
 	private long step;
 	private boolean runBACKWARDS = false;
-	private AtomicBoolean interrupt;
+	private AtomicBoolean interrupt = new AtomicBoolean();
 	
 	private class PeriodicRunnable implements java.lang.Runnable {
 		private long startTime;

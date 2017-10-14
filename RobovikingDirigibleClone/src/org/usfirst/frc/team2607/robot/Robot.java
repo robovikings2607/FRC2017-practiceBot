@@ -9,7 +9,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 
 import org.usfirst.frc.team2607.robot.auto.AutonomousEngine;
 
-import com.kauailabs.navx.frc.AHRS;
+//import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -36,7 +36,7 @@ public class Robot extends IterativeRobot {
 	public Solenoid shifter;
 	Thread Autothread = null;
 	PDPLogger pdpLogger;
-	public AHRS gyro;
+	//public AHRS gyro;
 	
 	public Shooter shooter;
 	
@@ -62,7 +62,7 @@ public class Robot extends IterativeRobot {
 		robotDrive.setSafetyEnabled(false);
 		driveController = new RobovikingStick(Constants.driverController);
 		opController = new RobovikingStick(Constants.operatorController);
-		gyro = new AHRS(Port.kMXP);
+		//gyro = new AHRS(Port.kMXP);
 		autoEngine=new AutonomousEngine(this);
 		autoEngine.loadSavedMode();
 		
@@ -105,7 +105,7 @@ public class Robot extends IterativeRobot {
 		
 	}
 	
-	int autonSwitch = 0;
+	int autonSwitch = 0; //originally 0
 	boolean autonModeRan = false;
 
 	@Override
@@ -198,14 +198,14 @@ public class Robot extends IterativeRobot {
 		
 	//DRIVING
 		if(driveController.getTriggerPressed(RobovikingStick.xBoxRightTrigger)) {
-			robotDrive.arcadeDrive(0.0 , calcTurn(SmartDashboard.getNumber("degToRotate", 0.0)));
+			//robotDrive.arcadeDrive(0.0 , calcTurn(SmartDashboard.getNumber("degToRotate", 0.0)));
 		} else {
 			robotDrive.arcadeDrive(driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxLeftStickY) , 
 					driveController.getRawAxisWithDeadzone(RobovikingStick.xBoxRightStickX));
 			shifter.set(driveController.getToggleButton(RobovikingStick.xBoxButtonLeftStick));
 			leftTrans.setHighGear(!shifter.get() , false);
 			rightTrans.setHighGear(!shifter.get() , false);
-			if(driveController.getButtonPressedOneShot(RobovikingStick.xBoxButtonStart)) gyro.reset();
+			//if(driveController.getButtonPressedOneShot(RobovikingStick.xBoxButtonStart)) gyro.reset();
 		}
 		
 	//CLIMBER
@@ -257,7 +257,7 @@ public class Robot extends IterativeRobot {
 		rightTrans.setHighGear(false, true);
 	}
 	
-	public double calcTurn(double degToTurn) {
+	/*public double calcTurn(double degToTurn) {
 		//long timeoutMilli = 3000;
 		//long startTime = System.currentTimeMillis();
 		
@@ -265,7 +265,7 @@ public class Robot extends IterativeRobot {
 		double maxTurn = 0.7;
 		double tolerance = 0.5;
 				
-		double error = degToTurn - gyro.getYaw();
+		//double error = degToTurn - gyro.getYaw();
 		//System.out.println("calcTurn error: " + error);
 			
 		double calcTurn = kP * error;
@@ -282,8 +282,8 @@ public class Robot extends IterativeRobot {
 			return calcTurn;
 		}
 	}
-
-	public void rotateDeg(double target) {
+*/
+	/*public void rotateDeg(double target) {
 		long startTime = System.currentTimeMillis();
 		long deltaTime;
 		//FOR USE IN AUTONOMOUS MODES
@@ -298,6 +298,6 @@ public class Robot extends IterativeRobot {
 			else if(deltaTime >= 5000){ System.out.println("TIMED OUT: rotation could not be completed"); keepZeroing = false;}
 		}
 		
-	}
+	}*/
 }
 

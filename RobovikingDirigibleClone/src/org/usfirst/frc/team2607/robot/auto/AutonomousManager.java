@@ -26,11 +26,11 @@ public class AutonomousManager {
 		modes.add(new DoNothingFailsafe());
 		modes.add(new DoNothing());
 		modes.add(new CrossBaseline(robot));
-		//modes.add(new CenterPeg(robot));
+		modes.add(new CenterPeg(robot));
 		//modes.add(new LeftPeg(robot));
 		//modes.add(new RightPeg(robot));
 		//modes.add(new LeftPegAlt(robot));
-		modes.add(new CenterPegAlt(robot));
+		//modes.add(new CenterPegAlt(robot));
 	}
 	
 	public AutonomousMode getModeByName (String name){
@@ -102,6 +102,7 @@ public class AutonomousManager {
 	public class CrossBaseline extends AutonomousMode {
 		Path path;
 		CrossBaseline(Robot r) {
+			super(r);
 			TrajectoryGenerator.Config config =new TrajectoryGenerator.Config();
 			config.dt = 0.05;
 			config.max_acc = 5.0;
@@ -116,7 +117,6 @@ public class AutonomousManager {
 		}
 		@Override
 		public void run() {
-			robot.shifter.set(Constants.lowGear);
 			robot.leftTrans.setHighGear(false, true);
 			robot.rightTrans.setHighGear(false, true);
 			
@@ -150,6 +150,7 @@ public class AutonomousManager {
 			p.addWaypoint(new WaypointSequence.Waypoint(0.0 , 0.0 , 0.0));
 			p.addWaypoint(new WaypointSequence.Waypoint(7.3 , 0.0 , 0.0));
 			
+			System.out.println("Generating CenterPeg path");
 			path = PathGenerator.makePath(p, config, Constants.kWheelbaseWidth, "CenterPeg");
 		}
 		
@@ -161,14 +162,14 @@ public class AutonomousManager {
 				RobovikingDriveTrainProfileDriver driver = new RobovikingDriveTrainProfileDriver(robot.leftTrans , robot.rightTrans , path);
 				driver.followPathBACKWARDS();
 				while (!driver.isDone()) Thread.sleep(20);
-				//robot.gearHandler.setDoors(Constants.gearOpen);
+				robot.gearHandler.setDoors(Constants.gearOpen);
 				Thread.sleep(500);
 				robot.leftTrans.set(-100);
 				robot.rightTrans.set(100);
 				Thread.sleep(300);
 				robot.leftTrans.set(0);
 				robot.rightTrans.set(0);
-				//robot.gearHandler.setDoors(Constants.gearClosed);
+				robot.gearHandler.setDoors(Constants.gearClosed);
 				robot.shifter.set(Constants.highGear);
 				robot.leftTrans.setHighGear(true, false);
 				robot.rightTrans.setHighGear(true, false);
@@ -411,7 +412,7 @@ public class AutonomousManager {
 	 */
 	
 	//TODO Add a switch to invert the angles that we turn at, since the red alliance wall is not the same as the blue alliance wall
-	public class LeftPeg extends AutonomousMode {
+	/*public class LeftPeg extends AutonomousMode {
 		private Path path_0 , path_1 , path_2;
 		
 		LeftPeg(Robot r) {
@@ -443,10 +444,10 @@ public class AutonomousManager {
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
 			path_2 = PathGenerator.makePath(waypoints_2, config_alt, Constants.kWheelbaseWidth, "LeftPeg_2");
-		}
+		}*/
 		
-		@Override
-		public void run() {
+	//@Override
+		/*public void run() {
 			robot.setupAutonConfig();
 			try {
 				Thread.sleep(250); //WAITING FOR SHIFTERS
@@ -482,9 +483,9 @@ public class AutonomousManager {
 			return "03-LeftPeg";
 		}
 		
-	}
+	}*/
 	
-	public class RightPeg extends AutonomousMode {
+	/*public class RightPeg extends AutonomousMode {
 		private Path path_0 , path_1 , path_2;
 		
 		RightPeg(Robot r) {
@@ -555,7 +556,7 @@ public class AutonomousManager {
 			return "04-RightPeg";
 		}
 		
-	}
+	}*/
 	
 	public class CenterPegAlt extends AutonomousMode {
 		Path path_0, path_1;
@@ -598,7 +599,7 @@ public class AutonomousManager {
 				robot.gearHandler.setPickup(false);
 				Thread.sleep(30);
 				
-				robot.rotateDeg(16.0);
+				/*robot.rotateDeg(16.0);
 				Thread.sleep(30);
 				
 				robot.shooter.set(1.0);
@@ -606,7 +607,7 @@ public class AutonomousManager {
 				robot.shooter.load(true);
 				Thread.sleep(5000);
 				robot.shooter.load(false);
-				robot.shooter.set(0.0);
+				robot.shooter.set(0.0);*/
 				
 			} catch (Exception e) {}
 		}
@@ -616,7 +617,7 @@ public class AutonomousManager {
 		}
 	}
 
-	public class LeftPegAlt extends AutonomousMode {
+	/*public class LeftPegAlt extends AutonomousMode {
 		private Path path_0 , path_1 , path_2;
 		
 		public LeftPegAlt(Robot r)	{
@@ -648,9 +649,9 @@ public class AutonomousManager {
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(0.0, 0.0, 0.0));
 			waypoints_2.addWaypoint(new WaypointSequence.Waypoint(25.0, 0.0, 0.0));
 			path_2 = PathGenerator.makePath(waypoints_2, config_alt, Constants.kWheelbaseWidth, "LeftPeg_2");
-		}
+		}*/
 		
-		 @Override
+	/*	 @Override
 		public void run() {
 			 robot.setupAutonConfig();
 				try {
@@ -684,5 +685,5 @@ public class AutonomousManager {
 		public String getName() {
 			return "LegPegAlt";
 		}
-	}
+	}*/
 }
