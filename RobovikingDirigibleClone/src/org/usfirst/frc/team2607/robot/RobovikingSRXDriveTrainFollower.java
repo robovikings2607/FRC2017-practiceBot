@@ -1,8 +1,8 @@
 package org.usfirst.frc.team2607.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.TalonControlMode;
-import com.ctre.CANTalon.TrajectoryPoint;
+import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
+import com.ctre.phoenix.MotorControl.SmartMotorController.TrajectoryPoint;
+import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 import com.team254.lib.trajectory.Path;
 import com.team254.lib.trajectory.Trajectory;
 import com.team254.lib.trajectory.Trajectory.Segment;
@@ -15,7 +15,7 @@ import org.usfirst.frc.team2607.robot.Constants;
 
 public class RobovikingSRXDriveTrainFollower extends Thread {
 
-	private CANTalon leftSRX, rightSRX;				// the SRX's we're driving			
+	private TalonSRX leftSRX, rightSRX;				// the SRX's we're driving			
 	private AtomicInteger state;			// the state machine control variable
 	private TrajectoryPoint[] leftPoints, rightPoints;
 	Notifier notifier = new Notifier(new PeriodicRunnable());
@@ -24,8 +24,8 @@ public class RobovikingSRXDriveTrainFollower extends Thread {
 	    public void run() {  leftSRX.processMotionProfileBuffer(); rightSRX.processMotionProfileBuffer(); }
 	}
 	
-	private CANTalon.MotionProfileStatus leftMPStatus = new CANTalon.MotionProfileStatus(),
-										 rightMPStatus = new CANTalon.MotionProfileStatus();
+	private TalonSRX.MotionProfileStatus leftMPStatus = new TalonSRX.MotionProfileStatus(),
+										 rightMPStatus = new TalonSRX.MotionProfileStatus();
 
 	public RobovikingSRXDriveTrainFollower(Transmission leftTrans, Transmission rightTrans, Path p, boolean followBackwards) {
 		leftSRX = leftTrans.getMasterSRX();
@@ -110,14 +110,14 @@ public class RobovikingSRXDriveTrainFollower extends Thread {
 				curPoint = 0; 			// talon MP state could be either Hold or Disable
 				break;	
 			case 1:						// triggered start
-				if (leftMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable && 
-				    rightMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable) { 
+				if (leftMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable && 
+				    rightMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable) { 
 					leftSRX.clearMotionProfileTrajectories();
 					rightSRX.clearMotionProfileTrajectories();
 					state.compareAndSet(1,2);		//state += 1;
 				}
-				leftSRX.set(CANTalon.SetValueMotionProfile.Disable.value);
-				rightSRX.set(CANTalon.SetValueMotionProfile.Disable.value);
+				leftSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);
+				rightSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);
 				curPoint = 0;
 				break;
 			case 2:						// push and start profile
@@ -127,39 +127,39 @@ public class RobovikingSRXDriveTrainFollower extends Thread {
 					rightSRX.pushMotionProfileTrajectory(rightPoints[curPoint]);
 					if (++curPoint == 6) {
 						System.out.println("Enabling SRXs");
-						leftSRX.set(CANTalon.SetValueMotionProfile.Enable.value);
-						rightSRX.set(CANTalon.SetValueMotionProfile.Enable.value);
+						leftSRX.set(TalonSRX.SetValueMotionProfile.Enable.value);
+						rightSRX.set(TalonSRX.SetValueMotionProfile.Enable.value);
 					}
 				}
 				state.compareAndSet(2, 3);
 				System.out.println("going to state 3");
 				break;
 			case 3:						// MP is running, when we get to end set talon to hold last point
-				if (leftMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable && 
-					rightMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable) {
+				if (leftMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable && 
+					rightMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable) {
 					state.compareAndSet(3, 0);
 					System.out.println("SRX's disabled, returning to state 0");
 				}
 				
 				if (leftMPStatus.activePointValid && leftMPStatus.activePoint.isLastPoint) {
-					leftSRX.set(CANTalon.SetValueMotionProfile.Disable.value);		
+					leftSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);		
 					System.out.println("leftSRX at last point, disabling");
 				}
 				
 				if (rightMPStatus.activePointValid && rightMPStatus.activePoint.isLastPoint) {
-					rightSRX.set(CANTalon.SetValueMotionProfile.Disable.value);
+					rightSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);
 					System.out.println("rightSRX at last point, disabling");
 				}
 				
 			case 10:					// reset state to interrupt and clear the running MP, and go back to wait	
-				if (leftMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable && 
-					rightMPStatus.outputEnable == CANTalon.SetValueMotionProfile.Disable) {
+				if (leftMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable && 
+					rightMPStatus.outputEnable == TalonSRX.SetValueMotionProfile.Disable) {
 					leftSRX.clearMotionProfileTrajectories();
 					rightSRX.clearMotionProfileTrajectories();
 					state.set(0);
 				} else {
-					leftSRX.set(CANTalon.SetValueMotionProfile.Disable.value);
-					rightSRX.set(CANTalon.SetValueMotionProfile.Disable.value);
+					leftSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);
+					rightSRX.set(TalonSRX.SetValueMotionProfile.Disable.value);
 				}
 				break;
 		}

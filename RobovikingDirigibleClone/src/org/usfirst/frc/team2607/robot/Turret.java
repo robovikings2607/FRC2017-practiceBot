@@ -1,18 +1,18 @@
 package org.usfirst.frc.team2607.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
+import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
+import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 public class Turret {
-	CANTalon turret;
+	TalonSRX turret;
 	PIDLogger logger;
 	double targetPosition = 0.0;
 	
 	//60.0 RPM = desired cruise velocity
 	//
 	public Turret() {
-		turret = new CANTalon(Constants.turnTableMotor);
+		turret = new TalonSRX(Constants.turnTableMotor);
 		
 		turret.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		turret.reverseSensor(false);

@@ -1,24 +1,24 @@
 package org.usfirst.frc.team2607.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
+import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
+import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
 
 import edu.wpi.first.wpilibj.SpeedController;
 
 public class Transmission implements SpeedController{
 	
-	CANTalon motor1 , motor2;
+	TalonSRX motor1 , motor2;
 	PIDLogger logger;
 	private String name;
 	boolean pidEnabled , speedIsRPM= false , highGear = true;
  
 	public Transmission(int channelA , int channelB , String name){
-		motor1 = new CANTalon(channelA);
-		motor2 = new CANTalon(channelB);
+		motor1 = new TalonSRX(channelA);
+		motor2 = new TalonSRX(channelB);
 		this.name = name;
 		
-		motor2.changeControlMode(CANTalon.TalonControlMode.Follower);
+		motor2.changeControlMode(TalonSRX.TalonControlMode.Follower);
 		motor2.set(motor1.getDeviceID());
 		motor2.enableBrakeMode(true);
 		
@@ -212,7 +212,7 @@ public class Transmission implements SpeedController{
 		
 	}
 
-	public CANTalon getMasterSRX() {
+	public TalonSRX getMasterSRX() {
 		return motor1;
 	}
 	

@@ -1,19 +1,21 @@
 package org.usfirst.frc.team2607.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+
+import com.ctre.phoenix.MotorControl.SmartMotorController.FeedbackDevice;
+import com.ctre.phoenix.MotorControl.SmartMotorController.TalonControlMode;
+import com.ctre.phoenix.MotorControl.CAN.TalonSRX;
+
 import edu.wpi.first.wpilibj.Talon;
 
 public class Shooter {
 	
-	CANTalon shooterMaster, shooterFollower;
+	TalonSRX shooterMaster, shooterFollower;
 	Talon loader;
 	PIDLogger logger;
 	double targetSpeed = 0.0;
 	public Shooter() {
-		shooterMaster = new CANTalon(Constants.shooterMotorMaster);
-		shooterFollower = new CANTalon(Constants.shooterMotorFollower);
+		shooterMaster = new TalonSRX(Constants.shooterMotorMaster);
+		shooterFollower = new TalonSRX(Constants.shooterMotorFollower);
 		
 		loader= new Talon(Constants.loaderMotor);
 		
